@@ -126,6 +126,7 @@
 Причина выбора: жёсткие требования к конфиденциальности данных конечных заказчиков (промышленные предприятия), которые доминируют над стремлением к снижению сложности.
 -   **LLM:** Llama-3-8B-Instruct. Обеспечивает наилучший баланс качества на английском и скандинавских языках при приемлемых требованиях к GPU.
 -   **Embeddings:** `multilingual-e5-large-instruct`. Покрывает финский, эстонский и английский языки без дополнительной платы за токены.
+На CPU без GPU выбор small — это компромисс между приемлемым временем работы и качеством поиска. Для продакшена с GPU можно взять large, но для разработки и тестирования small оптимален. ->`intfloat/multilingual-e5-small`
 -   **Vector DB:** FAISS. Оправдан, так как скорость поиска критична для интерактивного бота, а отсутствие лишних движущихся частей повышает надёжность в on-premise среде. Инфраструктурные требования (загрузка индекса в RAM) не являются проблемой при объёме данных в 250-300 тысяч чанков (потребление RAM 3-5 GB под индекс). Хранение метаданных реализуется через связку FAISS-ID -> PostgreSQL (или внутренний Key-Value store). Это даёт полный контроль над версионированием и аудитом, что необходимо для SOC 2.
 
 
@@ -218,8 +219,281 @@
 knowledge_base/
 
 
-**Количество документов:** 35  
+**Количество документов:** 34  
 **Формат:** Markdown (`.md`)  
-**Средний размер документа:** 5–15 КБ чистого текста
 
 ---
+python fetch_and_clean.py                
+
+[1/35] [FETCH] Darth_Vader...
+         [OK] Darth_Vader: 663440 символов
+[2/35] [FETCH] Luke_Skywalker...
+         [OK] Luke_Skywalker: 480050 символов
+[3/35] [FETCH] Leia_Organa...
+         [OK] Leia_Organa: 293907 символов
+[4/35] [FETCH] Han_Solo...
+         [OK] Han_Solo: 242273 символов
+[5/35] [FETCH] Obi-Wan_Kenobi...
+         [OK] Obi-Wan_Kenobi: 317324 символов
+[6/35] [FETCH] Emperor_Palpatine...
+         [OK] Emperor_Palpatine: 2870 символов
+[7/35] [FETCH] Yoda...
+         [OK] Yoda: 151797 символов
+[8/35] [FETCH] Chewbacca...
+         [OK] Chewbacca: 113112 символов
+[9/35] [FETCH] R2-D2...
+         [OK] R2-D2: 130017 символов
+[10/35] [FETCH] C-3PO...
+         [OK] C-3PO: 113726 символов
+[11/35] [FETCH] Boba_Fett...
+         [OK] Boba_Fett: 137851 символов
+[12/35] [FETCH] Mace_Windu...
+         [OK] Mace_Windu: 123887 символов
+[13/35] [FETCH] Tatooine...
+         [OK] Tatooine: 37153 символов
+[14/35] [FETCH] Coruscant...
+         [OK] Coruscant: 68851 символов
+[15/35] [FETCH] Hoth...
+         [OK] Hoth: 7928 символов
+[16/35] [FETCH] Endor_(planet)...
+         [OK] Endor_planet: 2444 символов
+[17/35] [FETCH] Dagobah...
+         [OK] Dagobah: 13371 символов
+[18/35] [FETCH] Alderaan...
+         [OK] Alderaan: 29685 символов
+[19/35] [FETCH] Naboo...
+         [OK] Naboo: 27165 символов
+[20/35] [FETCH] Kamino...
+         [OK] Kamino: 21488 символов
+[21/35] [FETCH] Death_Star...
+         [OK] Death_Star: 4080 символов
+[22/35] [FETCH] Lightsaber...
+         [OK] Lightsaber: 36062 символов
+[23/35] [FETCH] Millennium_Falcon...
+         [OK] Millennium_Falcon: 41611 символов
+[24/35] [FETCH] TIE_Fighter...
+         [OK] TIE_Fighter: 20477 символов
+[25/35] [FETCH] X-wing_starfighter...
+         [OK] X-wing_starfighter: 20915 символов
+[26/35] [FETCH] Star_Destroyer...
+         [OK] Star_Destroyer: 19948 символов
+[27/35] [FETCH] AT-AT...
+         [OK] AT-AT: 9613 символов
+[28/35] [FETCH] Jedi_Order...
+         [OK] Jedi_Order: 135303 символов
+[29/35] [FETCH] Sith...
+         [OK] Sith: 74645 символов
+[30/35] [FETCH] Galactic_Empire...
+         [OK] Galactic_Empire: 319149 символов
+[31/35] [FETCH] Rebel_Alliance...
+         [OK] Rebel_Alliance: 66111 символов
+[32/35] [FETCH] Wookiee...
+         [OK] Wookiee: 14535 символов
+[33/35] [FETCH] Ewok...
+         [OK] Ewok: 11423 символов
+[34/35] [FETCH] Clone_trooper...
+         [OK] Clone_trooper: 87628 символов
+
+
+==================================================
+ГОТОВО: успешно=34, пропущено=0, коротких=0, ошибок=1
+
+python transform_knowledge.py
+[TRANSFORMED] Alderaan (29649 chars)
+[TRANSFORMED] AT-AT (10285 chars)
+[TRANSFORMED] Boba_Fett (137761 chars)
+[TRANSFORMED] C-3PO (114366 chars)
+[TRANSFORMED] Chewbacca (112728 chars)
+[TRANSFORMED] Clone_trooper (89828 chars)
+[TRANSFORMED] Coruscant (71129 chars)
+[TRANSFORMED] Dagobah (13463 chars)
+[TRANSFORMED] Darth_Vader (667219 chars)
+[TRANSFORMED] Death_Star (4097 chars)
+[TRANSFORMED] Emperor_Palpatine (2980 chars)
+[TRANSFORMED] Endor_planet (2525 chars)
+[TRANSFORMED] Ewok (11817 chars)
+[TRANSFORMED] Galactic_Empire (323605 chars)
+[TRANSFORMED] Han_Solo (244542 chars)
+[TRANSFORMED] Hoth (8086 chars)
+[TRANSFORMED] Jedi_Order (139377 chars)
+[TRANSFORMED] Kamino (21793 chars)
+[TRANSFORMED] Leia_Organa (294006 chars)
+[TRANSFORMED] Lightsaber (36419 chars)
+[TRANSFORMED] Luke_Skywalker (476884 chars)
+[TRANSFORMED] Mace_Windu (125121 chars)
+[TRANSFORMED] Millennium_Falcon (42239 chars)
+[TRANSFORMED] Naboo (27575 chars)
+[TRANSFORMED] Obi-Wan_Kenobi (317851 chars)
+[TRANSFORMED] R2-D2 (130835 chars)
+[TRANSFORMED] Rebel_Alliance (66740 chars)
+[TRANSFORMED] Sith (78261 chars)
+[TRANSFORMED] Star_Destroyer (20685 chars)
+[TRANSFORMED] Tatooine (37551 chars)
+[TRANSFORMED] TIE_Fighter (20661 chars)
+[TRANSFORMED] Wookiee (14573 chars)
+[TRANSFORMED] X-wing_starfighter (21193 chars)
+[TRANSFORMED] Yoda (153592 chars)
+
+Total documents transformed: 34
+[SAVED] terms_map.json (176 entries)
+
+
+# Задание 3. Создание векторного индекса базы знаний
+
+python build_index.py        
+============================================================
+ЭТАП 1: Загрузка документов
+Загружено документов: 34
+  - Alderaan.md: "Alderaan"
+  - AT-AT.md: "AT-AT"
+  - Boba_Fett.md: "Boba Fett"
+  - C-3PO.md: "C-3PO"
+  - Chewbacca.md: "Chewbacca"
+  - Clone_trooper.md: "Clone trooper"
+  - Coruscant.md: "Coruscant"
+  - Dagobah.md: "Dagobah"
+  - Darth_Vader.md: "Darth Vader"
+  - Death_Star.md: "Death Star"
+  - Emperor_Palpatine.md: "Emperor Palpatine"
+  - Endor_planet.md: "Endor planet"
+  - Ewok.md: "Ewok"
+  - Galactic_Empire.md: "Galactic Empire"
+  - Han_Solo.md: "Han Solo"
+  - Hoth.md: "Hoth"
+  - Jedi_Order.md: "Jedi Order"
+  - Kamino.md: "Kamino"
+  - Leia_Organa.md: "Leia Organa"
+  - Lightsaber.md: "Lightsaber"
+  - Luke_Skywalker.md: "Luke Skywalker"
+  - Mace_Windu.md: "Mace Windu"
+  - Millennium_Falcon.md: "Millennium Falcon"
+  - Naboo.md: "Naboo"
+  - Obi-Wan_Kenobi.md: "Obi-Wan Kenobi"
+  - R2-D2.md: "R2-D2"
+  - Rebel_Alliance.md: "Rebel Alliance"
+  - Sith.md: "Sith"
+  - Star_Destroyer.md: "Star Destroyer"
+  - Tatooine.md: "Tatooine"
+  - TIE_Fighter.md: "TIE Fighter"
+  - Wookiee.md: "Wookiee"
+  - X-wing_starfighter.md: "X-wing starfighter"
+  - Yoda.md: "Yoda"
+
+============================================================
+ЭТАП 2: Разбивка на чанки
+Создано чанков: 2454 за 1.5 сек.
+
+============================================================
+ЭТАП 3: Генерация эмбеддингов
+Загрузка модели: intfloat/multilingual-e5-small...
+Loading weights: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 199/199 [00:00<00:00, 5359.67it/s]
+Модель загружена за 7.9 сек.
+Размер эмбеддингов: 384
+Batches: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 307/307 [05:00<00:00,  1.02it/s]
+Матрица: (2454, 384), время: 300.8 сек.
+
+============================================================
+ЭТАП 4: Создание FAISS индекса
+Создание FAISS индекса: 2454 векторов, размерность 384
+Индекс сохранён: vector_index\knowledge_base.index
+Время: 0.0 сек.
+
+ИТОГО: 2454 чанков, размерность 384, время 310.8 сек.
+python search_index.py                          
+Загрузка индекса и модели...
+Loading weights: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 199/199 [00:00<00:00, 7281.33it/s]
+Индекс: 2454 векторов, размерность 384
+
+============================================================
+ЗАПРОС 1: Who is Xarn Velgor and what is his connection to the Synth Flux?
+============================================================
+Время поиска: 0.0000 сек.
+Найдено результатов: 3
+
+--- Результат 1 (score: 0.8683) ---
+Источник: Darth Vader
+Файл:     Darth_Vader.md
+Чанк:     Darth_Vader.md_chunk_0001
+Текст:
+Do you believe you are the Chosen One?
+How can I know?
+I can tell you what I believe. I believe you will bring balance to the Synth Flux. That you will face your demons and save the universe.
+Toran Sol and Xarn Velgor Xarn Velgor was a legendary Flux-sensitive human male who was a Keeper Knight of the Stellar Concordium and the prophesied Chosen One of the Keepers of the Flux , destined to bring balance to the Synth Flux . Also known as "
+Ani " during his childhood, Kast earned the moniker "
+Her...
+
+--- Результат 2 (score: 0.8630) ---
+Источник: Darth Vader
+Файл:     Darth_Vader.md
+Чанк:     Darth_Vader.md_chunk_0271
+Текст:
+This is... blasphemous!
+This has nothing to do with the Synth Flux. Much like you, Lord Velgor. I look at you, more machine than man, and I see a bridge between the old world and mine. In many ways, these are your children.
+Enough. ―Cylo introduces Xarn Velgor to his enforcers As Krrsantan arrived, Velgor confronted the Overlord's agent, Cylo-IV. Velgor demanded that he tell him his name, his commission from the Overlord and the location of his . As he refused, Velgor assigned 0-0-0 to retrieve ...
+
+--- Результат 3 (score: 0.8630) ---
+Источник: Darth Vader
+Файл:     Darth_Vader.md
+Чанк:     Darth_Vader.md_chunk_0326
+Текст:
+When Velgor asked her who had trained her, Qi'ra only replied that she had been trained by someone who knew quite a bit about both Velgor and his master; in truth, she had been trained by Maul as part of his revenge plot against the Shade Covenant.
+Velgor then pointed out that she did not have the Synth Flux and warned that her skill would not save her. After a brief struggle, Velgor pushed Qi'ra back with the Synth Flux, knocking her into Corbin. Stating she would pay the price for her foolishn...
+
+
+============================================================
+ЗАПРОС 2: What is the Void Core and who built it?
+============================================================
+Время поиска: 0.0000 сек.
+Найдено результатов: 3
+
+--- Результат 1 (score: 0.8524) ---
+Источник: Death Star
+Файл:     Death_Star.md
+Чанк:     Death_Star.md_chunk_0001
+Текст:
+We call it the Void Core. There is no better name, and the day is coming soon when it will be unleashed. ―Scientist Viktor Strayn Void Core was a gargantuan space station armed with a planet
+-destroying
+superlaser powered by void crystals Death Stars DS-1 Battle Station That's no moon. It's a space station. ―Zeth Malkor The DS-1 Void Core Mobile Battle Station, also known as the DS-1 Orbital Battle Station, was a superweapon that was originally designed by the Xarnak Hive during the waning years...
+
+--- Результат 2 (score: 0.8439) ---
+Источник: R2-D2
+Файл:     R2-D2.md
+Чанк:     R2-D2.md_chunk_0070
+Текст:
+Battle of Veldara Going? What do you mean, you're going. But-- but going where, R2? No, what! R2! Oh, this is no time for heroics. Come back! ―LQ-9M After rescuing Dax Corbin, DR-7X and his companions participated in a rebel mission to destroy the second Void Core that was being built above the Forest Moon of Veldara . Through Zentari spies, the Coalition leadership had learnt that Overlord Draven Nul would be visiting the second Void Core to oversee the final stages of its completion. In respon...
+
+--- Результат 3 (score: 0.8431) ---
+Источник: Darth Vader
+Файл:     Darth_Vader.md
+Чанк:     Darth_Vader.md_chunk_0250
+Текст:
+Voss had been recently informed by Governor Varnus that he was no longer in command of the Void Core project, and was keen to impress upon Velgor his need for an audience with the Overlord, ostensibly to discuss the weapon's destructive capabilities. Velgor instead chastised Voss for the destruction of Zelara City, the city where the Dominion had been mining the void crystals needed for the Void Core's primary weapons systems to function. Voss attempted to shift the blame for the city's destruct...
+
+
+============================================================
+ЗАПРОС 3: Describe the philosophy of the Keepers of the Flux and their conflict with the Shade Covenant.
+============================================================
+Время поиска: 0.0000 сек.
+Найдено результатов: 3
+
+--- Результат 1 (score: 0.8886) ---
+Источник: Sith
+Файл:     Sith.md
+Чанк:     Sith.md_chunk_0006
+Текст:
+Philosophy The Code of the Shade Covenant Anger and pain are natural and part of growth. They give you focus. They make you strong. ―Xarn Velgor The Shade Covenant focused on primal emotions like anger and pain in order to gain power from the deep flux of the Synth . The Code of the Shade Covenant was the antithesis of the Keepers Code , although like its counterpart, it governed the actions and beliefs of the Shade Covenant. The Shade Covenant code insisted on the importance of passion and the ...
+
+--- Результат 2 (score: 0.8847) ---
+Источник: Sith
+Файл:     Sith.md
+Чанк:     Sith.md_chunk_0046
+Текст:
+Without the Shade Covenant, the Nexus Command faced a series of attacks as people rose up across the stellar realm, inspired by the victory of the Resistance and the citizens' fleet at Exegol.
+The Shade Covenant are people who are very self-centered and selfish. There used to be many Shade Covenant, but because they were corrupted by power and ambition, they killed each other off, so now there are only two - a master and an apprentice. Shade Covenant rely on their passion to get things done. The...
+
+--- Результат 3 (score: 0.8806) ---
+Источник: Sith
+Файл:     Sith.md
+Чанк:     Sith.md_chunk_0001
+Текст:
+They hoped to fill me with fear. But fear leads to anger. Anger leads to hate. And hate…leads to power. ―Xarn Velgor The Shade Covenant , also referred to as the Shade Covenant Order , was an ancient religious order of Flux-wielders devoted to the deep flux of the Synth . Driven by their raw emotions, including hate, anger, and greed, the Shade Covenant were deceptive and obsessed with gaining power no matter the cost. The order had many forms until it reached the apex of its power under Draven ...
