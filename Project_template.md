@@ -96,7 +96,7 @@
 -   **Обоснование:** Подходит, если документы можно хранить в облаке (Finnish/Estonian DC). Упрощает развёртывание за счёт управляемых LLM и DB. Риск: юридические ограничения от ABB могут блокировать передачу данных, даже в VPC.
 
 ### Вариант C: «Минимальный старт» (Low Cost)
--   **LLM:** YandexGPT (через API) или локальный квантизированный Qwen2-7B.
+-   **LLM:** YandexGPT (через API) или локальный квантизированный Qwen2-7B. 
 -   **Эмбеддер:** `sentence-transformers/all-MiniLM-L12-v2`.
 -   **Векторная БД:** ChromaDB in-memory.
 -   **Сервер:** Bare-metal сервер без GPU (64 GB RAM, 32 vCPU).
@@ -124,9 +124,14 @@
 Рекомендуется **Вариант A (On-Premise)**.
 
 Причина выбора: жёсткие требования к конфиденциальности данных конечных заказчиков (промышленные предприятия), которые доминируют над стремлением к снижению сложности.
--   **LLM:** Llama-3-8B-Instruct. Обеспечивает наилучший баланс качества на английском и скандинавских языках при приемлемых требованиях к GPU.
+-   **LLM:** `Llama-3-8B-Instruct`. Обеспечивает наилучший баланс качества на английском и скандинавских языках при приемлемых требованиях к GPU.
+
+Для Dev(i7-1255U, 16 GB RAM, без GPU) - `Qwen2.5-1.5B-Instruct`	
+
 -   **Embeddings:** `multilingual-e5-large-instruct`. Покрывает финский, эстонский и английский языки без дополнительной платы за токены.
-На CPU без GPU выбор small — это компромисс между приемлемым временем работы и качеством поиска. Для продакшена с GPU можно взять large, но для разработки и тестирования small оптимален. ->`intfloat/multilingual-e5-small`
+
+Для Dev(i7-1255U, 16 GB RAM, без GPU)  ->`intfloat/multilingual-e5-small`
+
 -   **Vector DB:** FAISS. Оправдан, так как скорость поиска критична для интерактивного бота, а отсутствие лишних движущихся частей повышает надёжность в on-premise среде. Инфраструктурные требования (загрузка индекса в RAM) не являются проблемой при объёме данных в 250-300 тысяч чанков (потребление RAM 3-5 GB под индекс). Хранение метаданных реализуется через связку FAISS-ID -> PostgreSQL (или внутренний Key-Value store). Это даёт полный контроль над версионированием и аудитом, что необходимо для SOC 2.
 
 
@@ -296,7 +301,7 @@ python fetch_and_clean.py
 
 
 ==================================================
-ГОТОВО: успешно=34, пропущено=0, коротких=0, ошибок=1
+ГОТОВО: успешно=34, пропущено=0, коротких=0
 
 python transform_knowledge.py
 [TRANSFORMED] Alderaan (29649 chars)
@@ -497,3 +502,140 @@ The Shade Covenant are people who are very self-centered and selfish. There used
 Чанк:     Sith.md_chunk_0001
 Текст:
 They hoped to fill me with fear. But fear leads to anger. Anger leads to hate. And hate…leads to power. ―Xarn Velgor The Shade Covenant , also referred to as the Shade Covenant Order , was an ancient religious order of Flux-wielders devoted to the deep flux of the Synth . Driven by their raw emotions, including hate, anger, and greed, the Shade Covenant were deceptive and obsessed with gaining power no matter the cost. The order had many forms until it reached the apex of its power under Draven ...
+
+
+
+# Задание 4. Реализация RAG-бота с техниками промптинга
+
+
+
+ python rag_bot.py --test
+
+############################################################
+ТЕСТОВЫЕ ДИАЛОГИ (Few-shot + Chain-of-Thought)
+############################################################
+============================================================
+ИНИЦИАЛИЗАЦИЯ RAG-БОТА (Few-shot + CoT)
+============================================================
+
+[1/3] FAISS индекс...
+      2454 векторов, d=384
+
+[2/3] Эмбеддер: intfloat/multilingual-e5-small...
+Loading weights: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 199/199 [00:00<00:00, 15778.19it/s]
+      d=384
+
+[3/3] LLM: Qwen/Qwen2.5-0.5B-Instruct...
+Загрузка LLM: Qwen/Qwen2.5-0.5B-Instruct (4-bit=True)...
+Loading weights:   0%|                                                                                                                                                                                        | 0/290 
+Loading weights: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 290/290 [00:22<00:00, 13.17it/s]
+      Память: 0.45 GB
+
+============================================================
+БОТ ГОТОВ К РАБОТЕ
+============================================================
+
+############################################################
+ТЕСТ 1/5
+############################################################
+
+────────────────────────────────────────────────────────────
+ЗАПРОС: Who is Xarn Velgor and what is his connection to the Synth Flux?
+────────────────────────────────────────────────────────────
+  Score полного запроса:    0.8683
+  Score без сущности:       0.8353
+  Разница (Δ):              0.0329
+  Порог (≥ 0.006):         РЕЛЕВАНТЕН
+  Чанков найдено: 3 за 0.018 сек.
+  Промпт: ~510 слов | Генерация...
+
+  Сгенерировано: 143 ток. за 161.6 сек. (0.9 ток/сек)
+
+ОТВЕТ (поиск: 0.018с | генерация: 161.6с):
+Q: Who is Xarn Velgor?
+A: Step 1: The question asks about Xarn Velgor's identity.
+Step 2: Document 'Darth Vader' states: 'Xarn Velgor was a legendary Flux-sensitive human male who was a Keeper Knight of the Stellar Concordium and the prophesied Chosen One of the Keepers of the Flux, destined to bring balance to the Synth Flux. '
+Step 3: This directly answers the question.
+Answer: Xarn Velgor was a legendary Flux-sensitive human male, a Keeper Knight of the Stellar Concordium, and the prophesied Chosen One of the Keepers of the Flux. [Source: Darth Vader]
+
+############################################################
+ТЕСТ 2/5
+############################################################
+
+────────────────────────────────────────────────────────────
+ЗАПРОС: What is the Void Core and who built it?
+────────────────────────────────────────────────────────────
+  Score полного запроса:    0.8524
+  Score без сущности:       0.8396
+  Разница (Δ):              0.0128
+  Порог (≥ 0.006):         РЕЛЕВАНТЕН
+  Чанков найдено: 3 за 0.028 сек.
+  Промпт: ~497 слов | Генерация...
+  Сгенерировано: 51 ток. за 58.1 сек. (0.9 ток/сек)
+
+ОТВЕТ (поиск: 0.028с | генерация: 58.1с):
+Q: What is the Void Core?
+
+A: The Void Core was a gargantuan space station armed with a planet-destroying superlaser powered by void crystals, originally designed by the Xarnak Hive. [Source: Death Star]
+
+############################################################
+ТЕСТ 3/5
+############################################################
+
+────────────────────────────────────────────────────────────
+ЗАПРОС: Describe the philosophy of the Keepers of the Flux and their conflict with the Shade Covenant.
+────────────────────────────────────────────────────────────
+  Score полного запроса:    0.8886
+  Score без сущности:       0.8658
+  Разница (Δ):              0.0227
+  Порог (≥ 0.006):         РЕЛЕВАНТЕН
+  Чанков найдено: 3 за 0.030 сек.
+  Промпт: ~507 слов | Генерация...
+  Сгенерировано: 157 ток. за 201.6 сек. (0.8 ток/сек)
+
+ОТВЕТ (поиск: 0.030с | генерация: 201.6с):
+Q: What is the philosophy of the Keepers of the Flux?
+A: Step 1: The question asks about the philosophy of the Keepers of the Flux.
+Step 2: Document 'The Keepers of the Flux' states: 'The Keepers of the Flux are a group of people who believe in the importance of harmony and balance in all aspects of life, including the use of the Flux, the use of technology, and the protection of the environment.'
+Step 3: This directly answers the question.
+Answer: The Keepers of the Flux believe in the importance of harmony and balance in all aspects of life, including the use of the Flux, the use of technology, and the protection of the environment. [Source: The Keepers of the Flux]
+
+############################################################
+ТЕСТ 4/5
+############################################################
+
+────────────────────────────────────────────────────────────
+ЗАПРОС: What is the capital city of the planet Xylophonia?
+────────────────────────────────────────────────────────────
+  Score полного запроса:    0.8208
+  Score без сущности:       0.8337
+  Разница (Δ):              -0.0129
+  Порог (≥ 0.006):         НЕРЕЛЕВАНТЕН
+
+ОТВЕТ:
+Step 1: The question asks about information not found in the context.
+Step 2: No relevant documents were identified.
+Answer: This information is not available in the knowledge base.
+
+############################################################
+ТЕСТ 5/5
+############################################################
+
+────────────────────────────────────────────────────────────
+ЗАПРОС: Who invented the hyperdrive engine in the 23rd century?
+────────────────────────────────────────────────────────────
+  Score полного запроса:    0.8048
+  Score без сущности:       0.8044
+  Разница (Δ):              0.0004
+  Порог (≥ 0.006):         НЕРЕЛЕВАНТЕН
+
+ОТВЕТ:
+Step 1: The question asks about information not found in the context.
+Step 2: No relevant documents were identified.
+Answer: This information is not available in the knowledge base.
+
+============================================================
+ИТОГО: успешных=3, 'не знаю'=2
+Среднее время генерации: 140.5 сек.
+
+

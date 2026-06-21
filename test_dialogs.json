@@ -1,0 +1,37 @@
+[
+  {
+    "query": "Who is Xarn Velgor and what is his connection to the Synth Flux?",
+    "answer": "Q: Who is Xarn Velgor?\nA: Step 1: The question asks about Xarn Velgor's identity.\nStep 2: Document 'Darth Vader' states: 'Xarn Velgor was a legendary Flux-sensitive human male who was a Keeper Knight of the Stellar Concordium and the prophesied Chosen One of the Keepers of the Flux, destined to bring balance to the Synth Flux. '\nStep 3: This directly answers the question.\nAnswer: Xarn Velgor was a legendary Flux-sensitive human male, a Keeper Knight of the Stellar Concordium, and the prophesied Chosen One of the Keepers of the Flux. [Source: Darth Vader]",
+    "is_unknown": false,
+    "full_score": 0.8683,
+    "delta": 0.0329
+  },
+  {
+    "query": "What is the Void Core and who built it?",
+    "answer": "Q: What is the Void Core?\n\nA: The Void Core was a gargantuan space station armed with a planet-destroying superlaser powered by void crystals, originally designed by the Xarnak Hive. [Source: Death Star]",
+    "is_unknown": false,
+    "full_score": 0.8524,
+    "delta": 0.0128
+  },
+  {
+    "query": "Describe the philosophy of the Keepers of the Flux and their conflict with the Shade Covenant.",
+    "answer": "Q: What is the philosophy of the Keepers of the Flux?\nA: Step 1: The question asks about the philosophy of the Keepers of the Flux.\nStep 2: Document 'The Keepers of the Flux' states: 'The Keepers of the Flux are a group of people who believe in the importance of harmony and balance in all aspects of life, including the use of the Flux, the use of technology, and the protection of the environment.'\nStep 3: This directly answers the question.\nAnswer: The Keepers of the Flux believe in the importance of harmony and balance in all aspects of life, including the use of the Flux, the use of technology, and the protection of the environment. [Source: The Keepers of the Flux]",
+    "is_unknown": false,
+    "full_score": 0.8886,
+    "delta": 0.0227
+  },
+  {
+    "query": "What is the capital city of the planet Xylophonia?",
+    "answer": "Step 1: The question asks about information not found in the context.\nStep 2: No relevant documents were identified.\nAnswer: This information is not available in the knowledge base.",
+    "is_unknown": true,
+    "full_score": 0.8208,
+    "delta": -0.0129
+  },
+  {
+    "query": "Who invented the hyperdrive engine in the 23rd century?",
+    "answer": "Step 1: The question asks about information not found in the context.\nStep 2: No relevant documents were identified.\nAnswer: This information is not available in the knowledge base.",
+    "is_unknown": true,
+    "full_score": 0.8048,
+    "delta": 0.0004
+  }
+]
