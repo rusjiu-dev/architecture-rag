@@ -1,8 +1,8 @@
 {
   "model_name": "intfloat/multilingual-e5-small",
   "embedding_dim": 384,
-  "num_documents": 34,
-  "num_chunks": 2454,
+  "num_documents": 35,
+  "num_chunks": 2455,
   "chunk_size_tokens": 460,
   "chunk_overlap_tokens": 80,
   "min_chunk_length_chars": 120,
